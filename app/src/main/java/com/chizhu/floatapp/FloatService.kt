@@ -15,9 +15,10 @@ class FloatService: Service() {
  private var panel:View?=null
  private val handler=Handler(Looper.getMainLooper())
  private fun dp(n:Int)=(n*resources.displayMetrics.density).toInt()
- private fun bg()=GradientDrawable().apply {setColor(0xee131c30.toInt());cornerRadius=dp(20).toFloat()}
- private fun text(s:String)=TextView(this).apply {text=s;textSize=17f;setTextColor(-1);setPadding(dp(10),dp(10),dp(10),dp(10))}
- private fun button(label:String,action:()->Unit)=Button(this).apply {text=label;isAllCaps=false;setOnClickListener{action()}}
+ private fun bg()=GradientDrawable(GradientDrawable.Orientation.TL_BR,intArrayOf(0xf2223049.toInt(),0xf0101828.toInt())).apply {cornerRadius=dp(18).toFloat();setStroke(dp(1),0x665a7b9e)}
+ private fun tileBg()=GradientDrawable().apply {setColor(0xaa28374f.toInt());cornerRadius=dp(12).toFloat();setStroke(dp(1),0x445b7895)}
+ private fun text(s:String)=TextView(this).apply {text=s;textSize=14f;setTextColor(-1);setPadding(dp(9),dp(7),dp(9),dp(7))}
+ private fun button(label:String,action:()->Unit)=TextView(this).apply {text=label;textSize=13f;setTextColor(Color.WHITE);gravity=Gravity.CENTER;setPadding(dp(9),dp(8),dp(9),dp(8));background=tileBg();setOnClickListener{action()}}
  private fun field(hint:String)=EditText(this).apply {setTextColor(-1);setHintTextColor(0xffaabbcc.toInt());setHint(hint)}
  override fun onBind(i:Intent?)=null
  override fun onCreate(){super.onCreate();wm=getSystemService(WINDOW_SERVICE) as WindowManager
@@ -25,8 +26,8 @@ class FloatService: Service() {
   nm.createNotificationChannel(NotificationChannel("float","Chizhu Float",NotificationManager.IMPORTANCE_LOW))
   val notification=Notification.Builder(this,"float").setContentTitle("Chizhu Float").setContentText("플로팅 도구 실행 중").setSmallIcon(android.R.drawable.ic_menu_manage).build()
   startForeground(1,notification)
-  val b=text("✦").apply {textSize=30f;gravity=Gravity.CENTER;background=bg()}
-  val p=WindowManager.LayoutParams(dp(60),dp(60),WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,PixelFormat.TRANSLUCENT).apply{gravity=Gravity.TOP or Gravity.START;x=dp(20);y=dp(200)}
+  val b=text("✦").apply {textSize=23f;gravity=Gravity.CENTER;background=bg();elevation=dp(8).toFloat()}
+  val p=WindowManager.LayoutParams(dp(46),dp(46),WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,PixelFormat.TRANSLUCENT).apply{gravity=Gravity.TOP or Gravity.START;x=dp(20);y=dp(200)}
   wm.addView(b,p);bubble=b
   var sx=0f;var sy=0f;var px=0;var py=0;var moved=false
   b.setOnTouchListener { _,e -> when(e.action){
@@ -38,26 +39,36 @@ class FloatService: Service() {
  }
  private fun window(title:String,fill:(LinearLayout)->Unit){
   panel?.let{wm.removeView(it)}
-  val root=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;background=bg();setPadding(dp(10),dp(10),dp(10),dp(10))}
+  val root=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;background=bg();setPadding(dp(10),dp(8),dp(10),dp(10))}
   val top=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL}
-  top.addView(text(title),LinearLayout.LayoutParams(0,dp(55),1f))
-  top.addView(button("✕"){wm.removeView(root);panel=null})
+  top.addView(text(title).apply {textSize=15f;setTypeface(null,android.graphics.Typeface.BOLD)},LinearLayout.LayoutParams(0,dp(42),1f))
+  top.addView(button("✕"){wm.removeView(root);panel=null},LinearLayout.LayoutParams(dp(38),dp(38)))
   root.addView(top)
   val scroll=ScrollView(this);val body=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL}
   scroll.addView(body);root.addView(scroll,LinearLayout.LayoutParams(-1,0,1f));fill(body)
-  val p=WindowManager.LayoutParams((resources.displayMetrics.widthPixels-dp(30)).coerceAtMost(dp(390)),(resources.displayMetrics.heightPixels-dp(120)).coerceAtMost(dp(610)),WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT).apply{gravity=Gravity.TOP or Gravity.START;x=dp(15);y=dp(80);softInputMode=WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE}
+  val p=WindowManager.LayoutParams((resources.displayMetrics.widthPixels-dp(50)).coerceAtMost(dp(308)),(resources.displayMetrics.heightPixels-dp(160)).coerceAtMost(dp(440)),WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,PixelFormat.TRANSLUCENT).apply{gravity=Gravity.TOP or Gravity.START;x=dp(15);y=dp(80);softInputMode=WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE}
   wm.addView(root,p);panel=root
   var sx=0f;var sy=0f;var px=0;var py=0
   top.setOnTouchListener{_,e->when(e.action){MotionEvent.ACTION_DOWN->{sx=e.rawX;sy=e.rawY;px=p.x;py=p.y;true};MotionEvent.ACTION_MOVE->{p.x=px+(e.rawX-sx).toInt();p.y=py+(e.rawY-sy).toInt();wm.updateViewLayout(root,p);true};else->true}}
  }
- private fun menu(): Unit = window("Chizhu Float"){c->
-  listOf("브라우저","메모장","계산기","타이머·스톱워치","클립보드","음악 컨트롤러","앱 바로가기","최근 알림").forEachIndexed{i,n->c.addView(button(n){when(i){0->browser();1->notes();2->calculator();3->timer();4->clipboard();5->music();6->apps();7->notifications()}})}
+ private fun menu(): Unit = window("CHIZHU  /  FLOAT"){c->
+  val items=listOf("🌐  브라우저","✎  메모","⌗  계산기","◷  타이머","▤  클립보드","♫  음악","▦  앱","◉  알림")
+  items.chunked(2).forEachIndexed { rowIndex,pair ->
+   val row=LinearLayout(this).apply {orientation=LinearLayout.HORIZONTAL}
+   c.addView(row,LinearLayout.LayoutParams(-1,dp(69)).apply {bottomMargin=dp(7)})
+   pair.forEachIndexed { columnIndex,label ->
+    val i=rowIndex*2+columnIndex
+    val cell=button(label){when(i){0->browser();1->notes();2->calculator();3->timer();4->clipboard();5->music();6->apps();7->notifications()}}
+    row.addView(cell,LinearLayout.LayoutParams(0,-1,1f).apply {if(columnIndex==0)rightMargin=dp(7)})
+   }
+  }
+  c.addView(text("드래그해서 이동  ·  ✕ 닫기").apply {textSize=11f;setTextColor(0xff9eafc5.toInt())})
  }
  private fun browser()=window("브라우저"){c->
   val address=field("웹 주소");c.addView(address)
   val web=WebView(this).apply{settings.javaScriptEnabled=true;settings.domStorageEnabled=true;webViewClient=WebViewClient();loadUrl("https://www.google.com")}
   c.addView(button("이동"){val s=address.text.toString().trim();if(s.isNotBlank())web.loadUrl(if(s.startsWith("https://"))s else "https://"+s)})
-  c.addView(web,LinearLayout.LayoutParams(-1,dp(400)))
+  c.addView(web,LinearLayout.LayoutParams(-1,dp(290)))
  }
  private fun notes()=window("메모장"){c->
   val pref=getSharedPreferences("chizhu",MODE_PRIVATE)
