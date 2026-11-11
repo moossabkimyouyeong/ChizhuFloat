@@ -50,7 +50,7 @@ class FloatService: Service() {
   var sx=0f;var sy=0f;var px=0;var py=0
   top.setOnTouchListener{_,e->when(e.action){MotionEvent.ACTION_DOWN->{sx=e.rawX;sy=e.rawY;px=p.x;py=p.y;true};MotionEvent.ACTION_MOVE->{p.x=px+(e.rawX-sx).toInt();p.y=py+(e.rawY-sy).toInt();wm.updateViewLayout(root,p);true};else->true}}
  }
- private fun menu()=window("Chizhu Float"){c->
+ private fun menu(): Unit = window("Chizhu Float"){c->
   listOf("브라우저","메모장","계산기","타이머·스톱워치","클립보드","음악 컨트롤러","앱 바로가기","최근 알림").forEachIndexed{i,n->c.addView(button(n){when(i){0->browser();1->notes();2->calculator();3->timer();4->clipboard();5->music();6->apps();7->notifications()}})}
  }
  private fun browser()=window("브라우저"){c->
@@ -108,7 +108,7 @@ class FloatService: Service() {
    c.addView(button(info.loadLabel(packageManager).toString()){packageManager.getLaunchIntentForPackage(info.activityInfo.packageName)?.let{it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(it)}})
   }
  }
- private fun notifications()=window("최근 알림"){c->
+ private fun notifications(): Unit = window("최근 알림"){c->
   val items=synchronized(FloatNotificationListener.recent){FloatNotificationListener.recent.toList()}
   if(items.isEmpty())c.addView(text("새로 수신한 알림이 없습니다."))
   items.forEach{c.addView(text(it))}
